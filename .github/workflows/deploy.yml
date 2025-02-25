@@ -1,29 +1,44 @@
 name: Deploy
-on: [push]
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+
     permissions:
-      id-token: write # Deno Deployでの認証に必要です。
-      contents: read # リポジトリのクローンに必要です。
+      id-token: write # Needed for auth with Deno Deploy
+      contents: read # Needed to clone the repository
 
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
 
-      # npmを使用していない場合は、`npm ci`を`yarn install`または`pnpm i`に変更してください。
-      - name: Install dependencies
-        run: npm ci
+      - name: Install Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
 
-      # npmを使用していない場合は、`npm run build`を`yarn build`または`pnpm run build`に変更してください。
-      - name: Build Astro
-        run: npm run build
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install step
+        run: "npm install"
+
+      - name: Build step
+        run: "npm run build"
 
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: my-deno-project # TODO： Deno Deployのプロジェクト名に置き換える。
-          entrypoint: server/entry.mjs
-          root: dist
+          project: "ultimate-sc-mai-vanilla-45"
+          entrypoint: "server/entry.mjs"
+          root: "dist"
+          
+          
